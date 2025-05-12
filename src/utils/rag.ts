@@ -5,31 +5,16 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-type CoachingTip = {
+export interface CoachingTip {
   text: string;
-  category: string;
+  metadata: {
+    category: string;
+  };
   embedding?: number[];
-};
+}
 
 let knowledgeBase: CoachingTip[] = [];
-
-export async function addToKnowledgeBase(tips: CoachingTip[]) {
-  if (!import.meta.env.VITE_OPENAI_API_KEY) {
-    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
-  }
-
-  knowledgeBase = [...tips];
-
-  for (const tip of knowledgeBase) {
-    if (!tip.embedding) {
-      const response = await openai.createEmbedding({
-        model: "text-embedding-ada-002",
-        input: tip.text,
-      });
-      tip.embedding = response.data.data[0].embedding;
-    }
-  }
-}
+let hasInitialized = false;
 
 function cosineSimilarity(a: number[], b: number[]): number {
   const dot = a.reduce((sum, val, i) => sum + val * b[i], 0);
@@ -38,6 +23,39 @@ function cosineSimilarity(a: number[], b: number[]): number {
   return dot / (normA * normB);
 }
 
+export async function initializeRAG() {
+  if (!import.meta.env.VITE_OPENAI_API_KEY) {
+    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
+  }
+}
+
+export async function addToKnowledgeBase(content: string) {
+  if (hasInitialized) return;
+  if (!import.meta.env.VITE_OPENAI_API_KEY) {
+    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
+  }
+
+  const tips = content.split('\n')
+    .filter(line => line.trim())
+    .map(line => JSON.parse(line) as CoachingTip);
+
+  knowledgeBase = tips;
+
+  for (const tip of knowledgeBase) {
+    if (!tip.embedding) {
+      const response = await openai.createEmbedding({
+        model: "text-embedding-ada-002",
+        input: tip.text,
+      });
+      tip.embedding = response.data.data[0].embedding;
+      // Pause briefly to avoid OpenAI rate limits
+      await new Promise(res => setTimeout(res, 200));
+    }
+  }
+
+  hasInitialized = true;
+}
+  
 export async function queryKnowledgeBase(query: string): Promise<CoachingTip | null> {
   if (!import.meta.env.VITE_OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
@@ -47,6 +65,7 @@ export async function queryKnowledgeBase(query: string): Promise<CoachingTip | n
     model: "text-embedding-ada-002",
     input: query,
   });
+
   const queryEmbedding = response.data.data[0].embedding;
 
   const bestMatch = knowledgeBase.reduce(
