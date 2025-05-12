@@ -9,7 +9,7 @@ function App() {
     const loadKnowledgeBase = async () => {
       try {
         await initializeRAG();
-        const response = await fetch('/src/data/coachingTips.jsonl');
+        const response = await fetch('/coachingTips.jsonl');
         const content = await response.text();
         await addToKnowledgeBase(content);
         setIsKnowledgeBaseLoaded(true);

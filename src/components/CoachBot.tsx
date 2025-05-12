@@ -1,24 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { getTipForAnswer } from "../data/tips";
-import { addToKnowledgeBase } from "../utils/rag";
 
-export default function CoachBot() {
+interface CoachBotProps {
+  isKnowledgeBaseLoaded: boolean;
+}
+
+export default function CoachBot({ isKnowledgeBaseLoaded }: CoachBotProps) {
   const [answer, setAnswer] = useState("");
   const [tip, setTip] = useState("");
   const [loading, setLoading] = useState(false);
-  const [kbLoaded, setKbLoaded] = useState(false);
-
-  // Load and embed the knowledge base once on mount
-  useEffect(() => {
-    const init = async () => {
-      await addToKnowledgeBase();
-      setKbLoaded(true);
-    };
-    init();
-  }, []);
 
   const handleSubmit = async () => {
-    if (!kbLoaded) {
+    if (!isKnowledgeBaseLoaded) {
       setTip("🔄 Loading knowledge base... please wait.");
       return;
     }
