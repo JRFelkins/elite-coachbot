@@ -1,5 +1,5 @@
 import { Configuration, OpenAIApi } from "openai";
-import tipsData from "../data/coachbot_tips_formatted.json";
+import tipsData from "../data/coachingTips.jsonl";
 
 const configuration = new Configuration({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
