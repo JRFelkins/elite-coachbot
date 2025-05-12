@@ -1,8 +1,16 @@
 import { Configuration, OpenAIApi } from "openai";
 
+// Load OpenAI API key from .env
+const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+if (!apiKey || typeof apiKey !== "string" || !apiKey.startsWith("sk-")) {
+  throw new Error("❌ OpenAI API key is missing or invalid. Please check your .env file.");
+}
+
 const configuration = new Configuration({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  apiKey,
 });
+
 const openai = new OpenAIApi(configuration);
 
 export interface CoachingTip {
