@@ -1,5 +1,4 @@
 import { Configuration, OpenAIApi } from "openai";
-import tipsData from "../data/coachingTips.jsonl";
 
 const configuration = new Configuration({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -14,8 +13,12 @@ type CoachingTip = {
 
 let knowledgeBase: CoachingTip[] = [];
 
-export async function addToKnowledgeBase() {
-  knowledgeBase = [...tipsData];
+export async function addToKnowledgeBase(tips: CoachingTip[]) {
+  if (!import.meta.env.VITE_OPENAI_API_KEY) {
+    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
+  }
+
+  knowledgeBase = [...tips];
 
   for (const tip of knowledgeBase) {
     if (!tip.embedding) {
@@ -36,6 +39,10 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 export async function queryKnowledgeBase(query: string): Promise<CoachingTip | null> {
+  if (!import.meta.env.VITE_OPENAI_API_KEY) {
+    throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
+  }
+
   const response = await openai.createEmbedding({
     model: "text-embedding-ada-002",
     input: query,
