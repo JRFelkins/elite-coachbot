@@ -1,3 +1,5 @@
+import { getTipForAnswer } from "../data/tips";
+import { CoachingTip } from "../data/tips";
 import React, { useState } from 'react';
 import { MessageCircle, Send, SkipForward } from 'lucide-react';
 import { questions } from '../data/questions';
