@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import CoachBot from './components/CoachBot';
 import { initializeRAG, addToKnowledgeBase } from './utils/rag';
+import coachingTipsData from './data/coachingTips.jsonl?raw';
 
 function App() {
   const [isKnowledgeBaseLoaded, setIsKnowledgeBaseLoaded] = useState(false);
@@ -9,9 +10,7 @@ function App() {
     const loadKnowledgeBase = async () => {
       try {
         await initializeRAG();
-        const response = await fetch('/coachingTips.jsonl');
-        const content = await response.text();
-        await addToKnowledgeBase(content);
+        await addToKnowledgeBase(coachingTipsData);
         setIsKnowledgeBaseLoaded(true);
       } catch (error) {
         console.error('Error loading knowledge base:', error);
