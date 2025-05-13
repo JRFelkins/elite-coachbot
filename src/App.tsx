@@ -9,11 +9,16 @@ function App() {
   useEffect(() => {
     const loadKnowledgeBase = async () => {
       try {
+        console.log('🚀 Starting knowledge base initialization...');
+        console.log('📝 Loading coaching tips data:', coachingTipsData.split('\n').length, 'lines');
+        
         await initializeRAG();
         await addToKnowledgeBase(coachingTipsData);
+        
+        console.log('✅ Knowledge base loaded successfully');
         setIsKnowledgeBaseLoaded(true);
       } catch (error) {
-        console.error('Error loading knowledge base:', error);
+        console.error('❌ Error loading knowledge base:', error);
       }
     };
 
@@ -35,5 +40,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

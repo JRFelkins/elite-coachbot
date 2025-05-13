@@ -32,13 +32,21 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 export async function initializeRAG() {
+  console.log('🚀 Initializing RAG system...');
   if (!import.meta.env.VITE_OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
   }
+  console.log('✅ OpenAI API key validated');
 }
 
 export async function addToKnowledgeBase(content: string) {
-  if (hasInitialized) return;
+  if (hasInitialized) {
+    console.log('📚 Knowledge base already initialized, skipping...');
+    return;
+  }
+  
+  console.log('📚 Adding content to knowledge base...');
+  
   if (!import.meta.env.VITE_OPENAI_API_KEY) {
     throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
   }
@@ -47,21 +55,31 @@ export async function addToKnowledgeBase(content: string) {
     .filter(line => line.trim())
     .map(line => JSON.parse(line) as CoachingTip);
 
+  console.log(`📝 Parsed ${tips.length} coaching tips`);
   knowledgeBase = tips;
 
+  console.log('🔄 Creating embeddings for tips...');
   for (const tip of knowledgeBase) {
     if (!tip.embedding) {
-      const response = await openai.createEmbedding({
-        model: "text-embedding-ada-002",
-        input: tip.text,
-      });
-      tip.embedding = response.data.data[0].embedding;
-      // Pause briefly to avoid OpenAI rate limits
-      await new Promise(res => setTimeout(res, 200));
+      try {
+        console.log(`Creating embedding for: "${tip.text.substring(0, 50)}..."`);
+        const response = await openai.createEmbedding({
+          model: "text-embedding-ada-002",
+          input: tip.text,
+        });
+        tip.embedding = response.data.data[0].embedding;
+        console.log('✅ Embedding created successfully');
+        // Pause briefly to avoid OpenAI rate limits
+        await new Promise(res => setTimeout(res, 200));
+      } catch (error) {
+        console.error('❌ Error creating embedding:', error);
+        throw error;
+      }
     }
   }
 
   hasInitialized = true;
+  console.log('✅ Knowledge base initialization complete');
 }
   
 export async function queryKnowledgeBase(query: string): Promise<CoachingTip | null> {
@@ -69,20 +87,33 @@ export async function queryKnowledgeBase(query: string): Promise<CoachingTip | n
     throw new Error('OpenAI API key is not configured. Please set VITE_OPENAI_API_KEY in your .env file.');
   }
 
-  const response = await openai.createEmbedding({
-    model: "text-embedding-ada-002",
-    input: query,
-  });
+  if (knowledgeBase.length === 0) {
+    console.warn('⚠️ Knowledge base is empty');
+    return null;
+  }
 
-  const queryEmbedding = response.data.data[0].embedding;
+  console.log(`🔍 Querying knowledge base with: "${query}"`);
 
-  const bestMatch = knowledgeBase.reduce(
-    (best, tip) => {
-      const similarity = cosineSimilarity(queryEmbedding, tip.embedding!);
-      return similarity > best.similarity ? { tip, similarity } : best;
-    },
-    { tip: null as CoachingTip | null, similarity: -Infinity }
-  );
+  try {
+    const response = await openai.createEmbedding({
+      model: "text-embedding-ada-002",
+      input: query,
+    });
 
-  return bestMatch.tip;
+    const queryEmbedding = response.data.data[0].embedding;
+
+    const bestMatch = knowledgeBase.reduce(
+      (best, tip) => {
+        const similarity = cosineSimilarity(queryEmbedding, tip.embedding!);
+        return similarity > best.similarity ? { tip, similarity } : best;
+      },
+      { tip: null as CoachingTip | null, similarity: -Infinity }
+    );
+
+    console.log(`✅ Found matching tip with similarity: ${bestMatch.similarity.toFixed(3)}`);
+    return bestMatch.tip;
+  } catch (error) {
+    console.error('❌ Error querying knowledge base:', error);
+    throw error;
+  }
 }
