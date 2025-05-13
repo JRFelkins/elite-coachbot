@@ -1,6 +1,34 @@
-
 import React, { useState } from "react";
-import { getNextAdaptiveQuestion, questions, UserState } from "../data/adaptiveQuestionSelector";
+import { questions } from "../data/questions";
+
+interface UserState {
+  seen: Set<string>;
+  liked: Set<string>;
+  skipped: Set<string>;
+  lastCategory: string | null;
+}
+
+function getNextAdaptiveQuestion(userState: UserState) {
+  // Filter out questions that have been seen
+  const unseenQuestions = questions.filter(q => !userState.seen.has(q.text));
+  
+  if (unseenQuestions.length === 0) {
+    return null;
+  }
+
+  // If there are questions from a different category than the last one, prioritize those
+  const differentCategoryQuestions = unseenQuestions.filter(q => 
+    userState.lastCategory === null || q.category !== userState.lastCategory
+  );
+
+  // Choose from different category questions if available, otherwise from all unseen
+  const availableQuestions = differentCategoryQuestions.length > 0 
+    ? differentCategoryQuestions 
+    : unseenQuestions;
+
+  // Return a random question from the available ones
+  return availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+}
 
 export default function CoachBot() {
   const [userState, setUserState] = useState<UserState>({
@@ -75,7 +103,7 @@ export default function CoachBot() {
         </>
       ) : (
         <div className="text-center text-gray-600 mt-8">
-          🎉 You’ve answered all available questions!
+          🎉 You've answered all available questions!
         </div>
       )}
     </div>
