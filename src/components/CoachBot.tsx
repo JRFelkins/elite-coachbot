@@ -25,7 +25,7 @@ export default function CoachBot({ isKnowledgeBaseLoaded }: CoachBotProps) {
   return (
     <div className="p-4 max-w-xl mx-auto rounded-xl bg-white shadow-md">
       <h2 className="text-xl font-bold mb-2">ELITE CoachBot 🧠</h2>
-      <p className="mb-2 text-gray-600">Describe a challenge you're facing:</p>
+      <p className="mb-2 text-gray-600">Coach Question:</p>
       
       <textarea
         value={answer}
