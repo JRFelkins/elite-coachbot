@@ -1,11 +1,11 @@
-import { getTipForAnswer, type CoachingTip } from "../data/tips";
+
 import React, { useState } from 'react';
 import { MessageCircle, Send, SkipForward } from 'lucide-react';
 import { questions } from '../data/questions';
 import { getTipForAnswer, type CoachingTip } from '../data/tips';
 import Question from './Question';
 import FeedbackButtons from './FeedbackButtons';
-import CoachingTip from './CoachingTip';
+import CoachingTipDisplay from './CoachingTip'; // renamed to avoid name clash
 
 interface CoachBotProps {
   isKnowledgeBaseLoaded: boolean;
@@ -35,16 +35,16 @@ const CoachBot: React.FC<CoachBotProps> = ({ isKnowledgeBaseLoaded }) => {
 
   const handleFeedback = (liked: boolean) => {
     if (isTransitioning) return;
-    
+
     setFeedback(prev => ({
       ...prev,
       [currentQuestionIndex]: liked
     }));
-    
+
     if (!answeredQuestions.includes(currentQuestionIndex)) {
       setAnsweredQuestions(prev => [...prev, currentQuestionIndex]);
     }
-    
+
     saveCurrentAnswer(liked);
     setShowTip(false);
     setSlideDirection('left');
@@ -65,10 +65,10 @@ const CoachBot: React.FC<CoachBotProps> = ({ isKnowledgeBaseLoaded }) => {
 
   const handleSubmit = async () => {
     if (!currentAnswer.trim() || !isKnowledgeBaseLoaded) return;
-    
+
     setIsProcessing(true);
     saveCurrentAnswer();
-    
+
     try {
       const newTip = await getTipForAnswer(currentAnswer);
       setCurrentTip(newTip);
@@ -83,7 +83,7 @@ const CoachBot: React.FC<CoachBotProps> = ({ isKnowledgeBaseLoaded }) => {
   const goToNextQuestion = () => {
     setIsTransitioning(true);
     setTimeout(() => {
-      setCurrentQuestionIndex(prev => 
+      setCurrentQuestionIndex(prev =>
         prev === totalQuestions - 1 ? 0 : prev + 1
       );
       setCurrentAnswer('');
@@ -104,7 +104,7 @@ const CoachBot: React.FC<CoachBotProps> = ({ isKnowledgeBaseLoaded }) => {
         <MessageCircle className="text-blue-100 mr-2" size={24} />
         <h2 className="text-xl text-blue-50 font-bold">Elite Coaching Session</h2>
       </div>
-      
+
       <div className="min-h-[300px] px-6 py-8 flex flex-col">
         <div className="flex-1 flex flex-col justify-center">
           <div className="flex justify-between items-start gap-4">
@@ -122,7 +122,7 @@ const CoachBot: React.FC<CoachBotProps> = ({ isKnowledgeBaseLoaded }) => {
               <SkipForward size={24} />
             </button>
           </div>
-          
+
           <div className={`mt-6 transition-all duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             <div className="relative">
               <textarea
@@ -142,14 +142,14 @@ const CoachBot: React.FC<CoachBotProps> = ({ isKnowledgeBaseLoaded }) => {
               </button>
             </div>
           </div>
-          
+
           {showTip && currentTip && (
             <div className="mt-4">
-              <CoachingTip tip={currentTip} isTransitioning={isTransitioning} />
+              <CoachingTipDisplay tip={currentTip} isTransitioning={isTransitioning} />
             </div>
           )}
         </div>
-        
+
         <div className="flex flex-col gap-4 mt-6">
           <FeedbackButtons 
             onLike={() => handleFeedback(true)}
