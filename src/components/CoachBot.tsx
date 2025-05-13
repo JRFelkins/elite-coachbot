@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { getTipForAnswer } from "../data/tips";
+import { ThumbsUp, ThumbsDown } from "lucide-react";
 
 interface CoachBotProps {
   isKnowledgeBaseLoaded: boolean;
@@ -9,6 +10,7 @@ export default function CoachBot({ isKnowledgeBaseLoaded }: CoachBotProps) {
   const [answer, setAnswer] = useState("");
   const [tip, setTip] = useState("");
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<"liked" | "disliked" | null>(null);
 
   const handleSubmit = async () => {
     if (!isKnowledgeBaseLoaded) {
@@ -17,9 +19,15 @@ export default function CoachBot({ isKnowledgeBaseLoaded }: CoachBotProps) {
     }
 
     setLoading(true);
+    setFeedback(null);
     const response = await getTipForAnswer(answer);
     setTip(response?.text || "No tip found.");
     setLoading(false);
+  };
+
+  const handleFeedback = (type: "liked" | "disliked") => {
+    setFeedback(type);
+    // Here you could add analytics or save feedback to a database
   };
 
   return (
@@ -44,8 +52,35 @@ export default function CoachBot({ isKnowledgeBaseLoaded }: CoachBotProps) {
       </button>
 
       {tip && (
-        <div className="mt-4 p-3 bg-gray-100 border-l-4 border-blue-600">
-          <p className="text-sm text-gray-800 italic">💡 {tip}</p>
+        <div className="mt-4">
+          <div className="p-3 bg-gray-100 border-l-4 border-blue-600">
+            <p className="text-sm text-gray-800 italic">💡 {tip}</p>
+          </div>
+          
+          <div className="mt-3 flex gap-2 justify-end">
+            <button
+              onClick={() => handleFeedback("liked")}
+              className={`p-2 rounded-full transition-colors ${
+                feedback === "liked"
+                  ? "bg-green-100 text-green-600"
+                  : "hover:bg-gray-100 text-gray-500"
+              }`}
+              aria-label="Like this tip"
+            >
+              <ThumbsUp size={20} />
+            </button>
+            <button
+              onClick={() => handleFeedback("disliked")}
+              className={`p-2 rounded-full transition-colors ${
+                feedback === "disliked"
+                  ? "bg-red-100 text-red-600"
+                  : "hover:bg-gray-100 text-gray-500"
+              }`}
+              aria-label="Dislike this tip"
+            >
+              <ThumbsDown size={20} />
+            </button>
+          </div>
         </div>
       )}
     </div>
