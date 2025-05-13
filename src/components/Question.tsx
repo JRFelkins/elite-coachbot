@@ -15,6 +15,7 @@ const Question: React.FC<QuestionProps> = ({ question, isTransitioning, slideDir
           : 'opacity-100 translate-x-0'
       }`}
     >
+      <p className="text-sm text-blue-200 mb-2">Coach Question:</p>
       <p className="text-lg font-medium text-blue-50">{question}</p>
     </div>
   );
