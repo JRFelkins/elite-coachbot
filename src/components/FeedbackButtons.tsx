@@ -23,6 +23,28 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
     onLike();
   };
 
+  const handleDislike = () => {
+    // Create red particles that fall down
+    confetti({
+      particleCount: 30,
+      spread: 50,
+      origin: { y: 0.5 },
+      colors: ['#ef4444', '#dc2626', '#b91c1c'],
+      gravity: 3,
+      scalar: 0.5,
+      ticks: 75,
+      shapes: ['square'],
+      drift: -2
+    });
+    
+    // Add shake animation to the button
+    const button = document.querySelector('[data-dislike-button]');
+    button?.classList.add('shake-animation');
+    setTimeout(() => button?.classList.remove('shake-animation'), 500);
+    
+    onDislike();
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <button
@@ -36,8 +58,9 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
       </button>
       
       <button
-        onClick={onDislike}
+        onClick={handleDislike}
         disabled={disabled}
+        data-dislike-button
         className="flex flex-col items-center justify-center p-3 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 transition-colors duration-200 disabled:opacity-50 border border-red-500/20"
         aria-label="Dislike this question"
       >
