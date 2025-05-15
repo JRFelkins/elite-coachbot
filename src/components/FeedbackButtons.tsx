@@ -14,22 +14,27 @@ const FeedbackButtons: React.FC<FeedbackButtonsProps> = ({
   disabled 
 }) => {
   const handleLike = () => {
+    // Create a vibrant multi-colored celebration
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.8 },
-      colors: ['#4ade80', '#22c55e', '#16a34a'],
+      colors: ['#4ade80', '#22c55e', '#16a34a', '#facc15', '#fbbf24', '#f59e0b', '#3b82f6', '#60a5fa', '#818cf8'],
+      ticks: 100,
+      startVelocity: 30,
+      shapes: ['circle', 'square'],
+      scalar: 1.2
     });
     onLike();
   };
 
   const handleDislike = () => {
-    // Create red particles that fall down
+    // Create multi-colored particles that fall down with a more dramatic effect
     confetti({
       particleCount: 30,
       spread: 50,
       origin: { y: 0.5 },
-      colors: ['#ef4444', '#dc2626', '#b91c1c'],
+      colors: ['#ef4444', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d'],
       gravity: 3,
       scalar: 0.5,
       ticks: 75,
